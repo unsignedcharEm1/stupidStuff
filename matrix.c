@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 // Matrix
 typedef struct dimension {
 	int row, column;
@@ -24,12 +25,23 @@ matrix* makeMatrix(int r, int c) {
 	// Rows
 	p->element = malloc(sizeof(int *)*r);
 	// Columns
-	for (int i = 0; i < c; i++) {
-	p->element[i] = malloc(sizeof(int));
+	for (int i = 0; i < r; i++) {
+	p->element[i] = malloc(sizeof(int) * c);
+		for (int j = 0; j < c; j++) p->element[i][j] = 0;
 	}
 	return p;
 }
-int main() {
-	matrix *mat = makeMatrix(3,3);
+void printMatrix(matrix *p) {
+	for (int r = 0; r < p->dim->row; r++) {
+		for (int c = 0; c < p->dim->column; c++) {
+			printf("%d ", p->element[r][c]);
+		}
+		putchar('\n');
+	}
+}
+// Main
+int main(int argc, char **argv) {
+	matrix *mat = makeMatrix(atoi(argv[1]),atoi(argv[2]));
 	printf("dimension %d x %d\n", mat->dim->row, mat->dim->column);
+	printMatrix(mat);
 }
