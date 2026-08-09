@@ -174,7 +174,7 @@ Finally moving onto our most anticipated topic.. constraints
 
 Register Constraints are a way to define which specific registers to assign for input or output.
 
-Constraint Table:
+Constraint Table (not exhaustive):
 
 | Constraint Symbol | Associated Register                                                                           | Name              |
 | ----------------- | --------------------------------------------------------------------------------------------- | ----------------- |
@@ -195,7 +195,7 @@ We also have table for Output prefixes:
 
 remember using "=r" (var) in output? thats literally it.
 
-if we use "+r (var)" in our output section that'd mean load whatever into any general purpose register from `var` before running the inline assembly and when the inline assembly finishes load whatever is in the general purpose register back into `var`
+if we use "+r" (var) in our output section that'd mean load whatever into any general purpose register from `var` before running the inline assembly and when the inline assembly finishes load whatever is in the general purpose register back into `var`
 
 ```c
 int var = 0;
@@ -230,3 +230,29 @@ And thats very logical because we dont want our compiler to delete or modify our
 We just want our inline assembly to run as it is so the usage of `volatile` is highly encouraged.
 
 *Please use the keyword for everything you have learned in this guide.*
+
+# Using Literal Register Names
+---
+
+So you know we dont always have to use place holders to access our registers infact we can already
+do it in inline assembly by prefixing `%` our literal register name
+
+for example:
+```C
+__asm__ volatile (
+	"movl $63, %%rax" // This would move the value 63 into the register rax
+	: // output
+	: // input
+	: // clobbers
+);
+```
+
+# What do to next?
+---
+Since this guide serves as an introduction to inline assembly i highly recommend reading official compiler documentations.
+
+https://gcc.gnu.org/onlinedocs/gcc/Using-Assembly-Language-with-C.html
+
+https://en.cppreference.com/c/language/asm
+
+https://dl.acm.org/doi/10.1145/3186411.3186418
