@@ -185,6 +185,7 @@ Constraint Table:
 | d                 | rdx, edx, dx                                                                                  | Data              |
 | S                 | rsi, esi, si                                                                                  | Source Index      |
 | D                 | rdi, edi, di                                                                                  | Destination Index |
+
 We also have table for Output prefixes:
 
 | prefix | meaning                                                    |
