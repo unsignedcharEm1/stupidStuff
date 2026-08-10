@@ -89,8 +89,8 @@ Lets take the code from our input example and modify it so it does something.
 ```C
 int var = 67;
 __asm__ (
-	"addl $10, %0\n\t" // woah??
-	"incl %0"
+	"addq $10, %0\n\t" // woah??
+	"incq %0"
 	: // Output
 	: "r" (var) // Heres our input section
 	: // Clobbers
@@ -110,10 +110,10 @@ int a = 50,
 b = 17, 
 c = 0;
 __asm__ (
-	"addl %1, %2\n\t"
-	"movl %2, %0"
+	"addl %1, %2\n\t" // adds the value of %1 to %2
+	"movl %2, %0" // moves whatever value is in %2 to %0
 	: "=r" (c) // output; %0
-	: "r" (a), "r" (b)// input; %1 %2
+	: "r" (a), "+r" (b)// input; %1 %2
 	: // Clobbers
 )
 ```
@@ -123,6 +123,11 @@ See? our registers got their placeholders in order, the register in the output s
 If we didnt have anything in the output section then the registers in our input sections would get `%0` and `%1` respectively instead of `%1` and `%2`
 
 If you tried printing the value of `c` hopefully you should get the value `67`
+
+note: we have used `"+r" (b)` because we load in the value from `b` and put into a general register then we modify
+it and we tell the compiler that we did by prefixing `+` to `r`.
+
+This is very important  to do because if we only put `"r" (b)` as the constraint in the input section our compile would think we loaded the value from `b` into a general register and did not modify and it will also think it is free to reuse that register thinking the original value of `b` is loaded in which is totally not ok.
 
 ## Clobbers
 
@@ -167,6 +172,21 @@ for (int i = 0; i < 67; i++) {
 Now the compiler explicitly knows that our inline assembly uses `rcx` register and it'll decide to use any other register like `rdx` or just store the iteration count into the stack memory.
 
 It is very very important to add the registers you have modified in your inline assembly code into clobber section to prevent critical bugs.
+
+Heres an example that prints something to the screen:
+```C
+	char *str = "meow\n";
+	__asm__ volatile (
+		"movq $1, %%rax\n\t" 
+		"movq $1, %%rdi\n\t"
+		"movq %0, %%rsi\n\t"
+		"movq $5, %%rdx\n\t" // since our string length is 5 we load it into rdx
+		"syscall"
+		: // output
+		: "r" (str) // input
+		: "rcx", "r11", "rax", "rdi", "rsi", "rdx" // In linux when we do a syscall it explicitly modifies "rcx" and "r11" register and the rest of the registers are what we modified
+	);
+```
 # Register Constraints
 ---
 
@@ -200,7 +220,7 @@ if we use "+r" (var) in our output section that'd mean load whatever into any ge
 ```c
 int var = 0;
 __asm__ volatile (
-	"movl $67, %0" 
+	"movq $67, %0" 
 	: "+r" (var)
 	: // input
 	: // Clobbers
@@ -240,10 +260,10 @@ do it in inline assembly by prefixing `%` our literal register name
 for example:
 ```C
 __asm__ volatile (
-	"movl $63, %%rax" // This would move the value 63 into the register rax
+	"movq $63, %%rax" // This would move the value 63 into the register rax
 	: // output
 	: // input
-	: // clobbers
+	: "rax" // clobbers; rax is clobbered because we modified it inside our inline assembly
 );
 ```
 
